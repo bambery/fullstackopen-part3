@@ -25,6 +25,12 @@ let persons = [
       "number": "39-23-6423122"
     }
 ]
+
+app.get('/info', (request, response) => {
+    const timestamp = new Date
+//    response.send(`<h1>Hello World! ${Date.now()}</h1>`)
+    response.send(`<div>Phonebook has info for ${persons.length} people.</div><div>${timestamp.toString()}</div>`)
+})
     
 app.get('/api/persons/', (request, response) => {
     response.json(persons)
