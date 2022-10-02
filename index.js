@@ -76,10 +76,14 @@ app.post('/api/persons', (request, response) => {
         return response.status(400).json({
             error: 'number is missing'
         })
+        /*
+         **** exercise 3.9 says that PUT/updates will be implemented in exercise 3.17
+         *
     } else if (persons.find(p => p.name === body.name)){
         return response.status(409).json({
             error: 'name must be unique'
         })
+        */
     }
 
     const person = {
