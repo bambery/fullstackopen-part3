@@ -12,7 +12,7 @@ if (process.argv.length < 3) {
     process.exit(1)
 } else if (process.argv.length === 3) {
     const password = encodeURI(process.argv[2])
-    const url = `mongodb+srv://fullstack:${password}@fso0.a31ltpt.mongodb.net/?retryWrites=true&w=majority`
+    const url = `mongodb+srv://fullstack:${password}@fso0.a31ltpt.mongodb.net/phonebook?retryWrites=true&w=majority`
     console.log("phonebook:")
     // fetch all existing persons
     mongoose
@@ -32,7 +32,7 @@ if (process.argv.length < 3) {
     const password = process.argv[2]
     const pname = process.argv[3]
     const pnumber = process.argv[4]
-    const url = `mongodb+srv://fullstack:${password}@fso0.a31ltpt.mongodb.net/?retryWrites=true&w=majority`
+    const url = `mongodb+srv://fullstack:${password}@fso0.a31ltpt.mongodb.net/phonebook?retryWrites=true&w=majority`
     // add peson to phonebook
     mongoose
         .connect(url)
