@@ -1,8 +1,6 @@
 require('dotenv').config()
 const express = require('express')
-const crypto = require('crypto')
 const morgan = require('morgan')
-const mongoose = require('mongoose')
 const cors = require('cors')
 const Person = require('./models/person')
 
@@ -11,7 +9,7 @@ app.use(cors())
 app.use(express.json())
 
 // http request logger
-morgan.token('body', function (req, res) { if (req.method === "POST"){ return JSON.stringify(req.body)}})
+morgan.token('body', function (req) { if (req.method === 'POST'){ return JSON.stringify(req.body)}})
 app.use(morgan(':method, :url, :status, :res[content-length] - :response-time ms :body'))
 
 app.get('/info', (request, response) => {
@@ -41,7 +39,7 @@ app.get('/api/persons/:id', (request, response, next) => {
 
 app.delete('/api/persons/:id', (request, response, next) => {
     Person.findByIdAndRemove(request.params.id)
-        .then(result => {
+        .then(() => {
             response.status(204).end()
         })
         .catch(error => next(error))
@@ -70,7 +68,7 @@ app.put('/api/persons/:id', (request, response, next) => {
         number: body.number
     }
 
-    Person.findByIdAndUpdate(request.params.id, person, { new: true, runValidators: true, context: 'query'})
+    Person.findByIdAndUpdate(request.params.id, person, { new: true, runValidators: true, context: 'query' })
         .then(updatedPerson => {
             response.json(updatedPerson)
         })
@@ -88,9 +86,9 @@ app.use(unknownEndpoint)
 const errorHandler = (error, request, response, next) => {
     console.error(error.message)
 
-    if (error.name === "CastError") {
-        return response.status(400).send({error: 'malformed id'})
-    } else if (error.name === "ValidationError") {
+    if (error.name === 'CastError') {
+        return response.status(400).send({ error: 'malformed id' })
+    } else if (error.name === 'ValidationError') {
         return response.status(400).json({ error: error.message })
     }
 
