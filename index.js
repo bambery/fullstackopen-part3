@@ -1,15 +1,20 @@
+require('dotenv').config()
 const express = require('express')
 const crypto = require('crypto')
 const morgan = require('morgan')
+const mongoose = require('mongoose')
 const cors = require('cors')
+const Person = require('./models/person')
 
 const app = express()
 app.use(cors())
 app.use(express.json())
 
+// http request logger
 morgan.token('body', function (req, res) { if (req.method === "POST"){ return JSON.stringify(req.body)}})
 app.use(morgan(':method, :url, :status, :res[content-length] - :response-time ms :body'))
 
+/*
 let persons = [
     {
       "id": 1,
@@ -32,32 +37,28 @@ let persons = [
       "number": "39-23-6423122"
     }
 ]
-
-const generateId = () => {
-    // the exercise says to use Math.random(), but es6 offers the crypto api which is better designed for this situation:
-    const array = new Uint32Array(1)
-    return crypto.getRandomValues(array)[0]
-}
+*/
 
 app.get('/info', (request, response) => {
     const timestamp = new Date
-//    response.send(`<h1>Hello World! ${Date.now()}</h1>`)
     response.send(`<div>Phonebook has info for ${persons.length} people.</div><div>${timestamp.toString()}</div>`)
 })
 
 app.get('/api/persons/', (request, response) => {
-    response.json(persons)
+    Person.find({}).then( persons => {
+        response.json(persons)
+    })
 })
 
 app.get('/api/persons/:id', (request, response) => {
-    const id = Number(request.params.id)
-    const person = persons.filter(person => person.id === id)
+    Person.findById(request.params.id).then(person => {
+        if(person) {
+            response.json(person)
+        } else {
+            response.status(404).end()
+        }
+    })
 
-    if(person) {
-        response.json(person)
-    } else {
-        response.status(404).end()
-    }
 })
 
 app.delete('/api/persons/:id', (request, response) => {
@@ -88,15 +89,14 @@ app.post('/api/persons', (request, response) => {
         */
     }
 
-    const person = {
+    const person = new Person({
         name: body.name,
         number: body.number,
-        id: generateId(),
-    }
+    })
 
-    persons = persons.concat(person)
-
-    response.json(person)
+    person.save().then(savedPerson => {
+        response.json(savedPerson)
+    })
 })
 
 const PORT = 3001
