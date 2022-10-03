@@ -15,8 +15,10 @@ morgan.token('body', function (req, res) { if (req.method === "POST"){ return JS
 app.use(morgan(':method, :url, :status, :res[content-length] - :response-time ms :body'))
 
 app.get('/info', (request, response) => {
-    const timestamp = new Date
-    response.send(`<div>Phonebook has info for ${persons.length} people.</div><div>${timestamp.toString()}</div>`)
+    Person.find({}).then( persons => {
+        const timestamp = new Date
+        response.send(`<div>Phonebook has info for ${persons.length} people.</div><div>${timestamp.toString()}</div>`)
+    })
 })
 
 app.get('/api/persons/', (request, response) => {
@@ -45,7 +47,7 @@ app.delete('/api/persons/:id', (request, response, next) => {
         .catch(error => next(error))
 })
 
-app.post('/api/persons', (request, response) => {
+app.post('/api/persons', (request, response, next) => {
     const body = request.body
 
     if (!body.name) {
@@ -56,14 +58,6 @@ app.post('/api/persons', (request, response) => {
         return response.status(400).json({
             error: 'number is missing'
         })
-        /*
-         **** exercise 3.9 says that PUT/updates will be implemented in exercise 3.17
-         *
-    } else if (persons.find(p => p.name === body.name)){
-        return response.status(409).json({
-            error: 'name must be unique'
-        })
-        */
     }
 
     const person = new Person({
@@ -71,9 +65,36 @@ app.post('/api/persons', (request, response) => {
         number: body.number,
     })
 
-    person.save().then(savedPerson => {
-        response.json(savedPerson)
-    })
+    person.save()
+        .then(savedPerson => {
+            response.json(savedPerson)
+        })
+        .catch(error => next(error))
+})
+
+app.put('/api/persons/:id', (request, response, next) => {
+    const body = request.body
+
+    if (!body.name) {
+        return response.status(400).json({
+            error: 'name is missing'
+        })
+    } else if (!body.number) {
+        return response.status(400).json({
+            error: 'number is missing'
+        })
+    }
+
+    const person = {
+        name: body.name,
+        number: body.number
+    }
+
+    Person.findByIdAndUpdate(request.params.id, person, { new: true })
+        .then(updatedPerson => {
+            response.json(updatedPerson)
+        })
+        .catch(error => next(error))
 })
 
 const unknownEndpoint = (request, response) => {
